@@ -64,7 +64,7 @@ class FeatureHistogram {
 
   void ResetFunc() {
     if (meta_->bin_type == BinType::NumericalBin) {
-      FuncForNumrical();
+      FuncForNumerical();
     } else {
       FuncForCategorical();
     }
@@ -95,7 +95,7 @@ class FeatureHistogram {
   }
 
   template <bool USE_RAND, bool USE_L1, bool USE_MAX_OUTPUT, bool USE_SMOOTHING>
-  double BeforeNumercal(double sum_gradient, double sum_hessian, double parent_output, data_size_t num_data,
+  double BeforeNumerical(double sum_gradient, double sum_hessian, double parent_output, data_size_t num_data,
                         SplitInfo* output, int* rand_threshold) {
     is_splittable_ = false;
     output->monotone_type = meta_->monotone_type;
@@ -112,49 +112,49 @@ class FeatureHistogram {
     return gain_shift + meta_->config->min_gain_to_split;
   }
 
-  void FuncForNumrical() {
+  void FuncForNumerical() {
     if (meta_->config->extra_trees) {
       if (meta_->config->monotone_constraints.empty()) {
-        FuncForNumricalL1<true, false>();
+        FuncForNumericalL1<true, false>();
       } else {
-        FuncForNumricalL1<true, true>();
+        FuncForNumericalL1<true, true>();
       }
     } else {
       if (meta_->config->monotone_constraints.empty()) {
-        FuncForNumricalL1<false, false>();
+        FuncForNumericalL1<false, false>();
       } else {
-        FuncForNumricalL1<false, true>();
+        FuncForNumericalL1<false, true>();
       }
     }
   }
   template <bool USE_RAND, bool USE_MC>
-  void FuncForNumricalL1() {
+  void FuncForNumericalL1() {
     if (meta_->config->lambda_l1 > 0) {
       if (meta_->config->max_delta_step > 0) {
-        FuncForNumricalL2<USE_RAND, USE_MC, true, true>();
+        FuncForNumericalL2<USE_RAND, USE_MC, true, true>();
       } else {
-        FuncForNumricalL2<USE_RAND, USE_MC, true, false>();
+        FuncForNumericalL2<USE_RAND, USE_MC, true, false>();
       }
     } else {
       if (meta_->config->max_delta_step > 0) {
-        FuncForNumricalL2<USE_RAND, USE_MC, false, true>();
+        FuncForNumericalL2<USE_RAND, USE_MC, false, true>();
       } else {
-        FuncForNumricalL2<USE_RAND, USE_MC, false, false>();
+        FuncForNumericalL2<USE_RAND, USE_MC, false, false>();
       }
     }
   }
 
   template <bool USE_RAND, bool USE_MC, bool USE_L1, bool USE_MAX_OUTPUT>
-  void FuncForNumricalL2() {
+  void FuncForNumericalL2() {
     if (meta_->config->path_smooth > kEpsilon) {
-      FuncForNumricalL3<USE_RAND, USE_MC, USE_L1, USE_MAX_OUTPUT, true>();
+      FuncForNumericalL3<USE_RAND, USE_MC, USE_L1, USE_MAX_OUTPUT, true>();
     } else {
-      FuncForNumricalL3<USE_RAND, USE_MC, USE_L1, USE_MAX_OUTPUT, false>();
+      FuncForNumericalL3<USE_RAND, USE_MC, USE_L1, USE_MAX_OUTPUT, false>();
     }
   }
 
   template <bool USE_RAND, bool USE_MC, bool USE_L1, bool USE_MAX_OUTPUT, bool USE_SMOOTHING>
-  void FuncForNumricalL3() {
+  void FuncForNumericalL3() {
 #define TEMPLATE_PREFIX USE_RAND, USE_MC, USE_L1, USE_MAX_OUTPUT, USE_SMOOTHING
 #define LAMBDA_ARGUMENTS                                         \
   double sum_gradient, double sum_hessian, data_size_t num_data, \
@@ -169,7 +169,7 @@ class FeatureHistogram {
         find_best_threshold_fun_ = [=](LAMBDA_ARGUMENTS) {
           int rand_threshold = 0;
           double min_gain_shift =
-              BeforeNumercal<USE_RAND, USE_L1, USE_MAX_OUTPUT, USE_SMOOTHING>(
+              BeforeNumerical<USE_RAND, USE_L1, USE_MAX_OUTPUT, USE_SMOOTHING>(
                   BEFORE_ARGUMENTS);
           FindBestThresholdSequentially<TEMPLATE_PREFIX, true, true, false>(
               FUNC_ARGUMENTS);
@@ -180,7 +180,7 @@ class FeatureHistogram {
         find_best_threshold_fun_ = [=](LAMBDA_ARGUMENTS) {
           int rand_threshold = 0;
           double min_gain_shift =
-              BeforeNumercal<USE_RAND, USE_L1, USE_MAX_OUTPUT, USE_SMOOTHING>(
+              BeforeNumerical<USE_RAND, USE_L1, USE_MAX_OUTPUT, USE_SMOOTHING>(
                   BEFORE_ARGUMENTS);
           FindBestThresholdSequentially<TEMPLATE_PREFIX, true, false, true>(
               FUNC_ARGUMENTS);
@@ -193,7 +193,7 @@ class FeatureHistogram {
         find_best_threshold_fun_ = [=](LAMBDA_ARGUMENTS) {
           int rand_threshold = 0;
           double min_gain_shift =
-              BeforeNumercal<USE_RAND, USE_L1, USE_MAX_OUTPUT, USE_SMOOTHING>(
+              BeforeNumerical<USE_RAND, USE_L1, USE_MAX_OUTPUT, USE_SMOOTHING>(
                   BEFORE_ARGUMENTS);
           FindBestThresholdSequentially<TEMPLATE_PREFIX, true, false, false>(
               FUNC_ARGUMENTS);
@@ -202,7 +202,7 @@ class FeatureHistogram {
         find_best_threshold_fun_ = [=](LAMBDA_ARGUMENTS) {
           int rand_threshold = 0;
           double min_gain_shift =
-              BeforeNumercal<USE_RAND, USE_L1, USE_MAX_OUTPUT, USE_SMOOTHING>(
+              BeforeNumerical<USE_RAND, USE_L1, USE_MAX_OUTPUT, USE_SMOOTHING>(
                   BEFORE_ARGUMENTS);
           FindBestThresholdSequentially<TEMPLATE_PREFIX, true, false, false>(
               FUNC_ARGUMENTS);
