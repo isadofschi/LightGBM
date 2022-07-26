@@ -830,6 +830,7 @@ class Dataset {
   std::vector<std::vector<double>> forced_bin_bounds_;
   int bin_construct_sample_cnt_;
   int min_data_in_bin_;
+  int min_data_in_leaf_;
   bool use_missing_;
   bool zero_as_missing_;
   std::vector<int> feature_need_push_zeros_;

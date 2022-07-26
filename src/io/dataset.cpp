@@ -412,6 +412,7 @@ void Dataset::Construct(std::vector<std::unique_ptr<BinMapper>>* bin_mappers,
   forced_bin_bounds_ = forced_bins;
   max_bin_ = io_config.max_bin;
   min_data_in_bin_ = io_config.min_data_in_bin;
+  min_data_in_leaf_ = io_config.min_data_in_leaf;
   bin_construct_sample_cnt_ = io_config.bin_construct_sample_cnt;
   use_missing_ = io_config.use_missing;
   zero_as_missing_ = io_config.zero_as_missing;
@@ -741,6 +742,7 @@ void Dataset::CreateValid(const Dataset* dataset) {
   num_groups_ = num_features_;
   max_bin_ = dataset->max_bin_;
   min_data_in_bin_ = dataset->min_data_in_bin_;
+  min_data_in_leaf_ = dataset->min_data_in_leaf_;
   bin_construct_sample_cnt_ = dataset->bin_construct_sample_cnt_;
   use_missing_ = dataset->use_missing_;
   zero_as_missing_ = dataset->zero_as_missing_;
@@ -1018,6 +1020,7 @@ void Dataset::SaveBinaryFile(const char* bin_filename) {
     writer->AlignedWrite(&bin_construct_sample_cnt_,
                          sizeof(bin_construct_sample_cnt_));
     writer->AlignedWrite(&min_data_in_bin_, sizeof(min_data_in_bin_));
+    writer->AlignedWrite(&min_data_in_leaf_, sizeof(min_data_in_leaf_));
     writer->AlignedWrite(&use_missing_, sizeof(use_missing_));
     writer->AlignedWrite(&zero_as_missing_, sizeof(zero_as_missing_));
     writer->AlignedWrite(&has_raw_, sizeof(has_raw_));
@@ -1171,7 +1174,7 @@ void Dataset::ConstructHistogramsInner(
         data_indices, num_data, gradients, hessians, share_state, hist_data);
   }
   std::vector<int> used_dense_group;
-  int multi_val_groud_id = -1;
+  int multi_val_group_id = -1;
   used_dense_group.reserve(num_groups_);
   for (int group = 0; group < num_groups_; ++group) {
     const int f_start = group_feature_start_[group];
@@ -1186,7 +1189,7 @@ void Dataset::ConstructHistogramsInner(
     }
     if (is_group_used) {
       if (feature_groups_[group]->is_multi_val_) {
-        multi_val_groud_id = group;
+        multi_val_group_id = group;
       } else {
         used_dense_group.push_back(group);
       }
@@ -1250,16 +1253,16 @@ void Dataset::ConstructHistogramsInner(
     OMP_THROW_EX();
   }
   global_timer.Stop("Dataset::dense_bin_histogram");
-  if (multi_val_groud_id >= 0) {
+  if (multi_val_group_id >= 0) {
     if (num_used_dense_group > 0) {
       ConstructHistogramsMultiVal<USE_INDICES, true>(
           data_indices, num_data, ptr_ordered_grad, ptr_ordered_hess,
           share_state,
-          hist_data + group_bin_boundaries_[multi_val_groud_id] * 2);
+          hist_data + group_bin_boundaries_[multi_val_group_id] * 2);
     } else {
       ConstructHistogramsMultiVal<USE_INDICES, false>(
           data_indices, num_data, gradients, hessians, share_state,
-          hist_data + group_bin_boundaries_[multi_val_groud_id] * 2);
+          hist_data + group_bin_boundaries_[multi_val_group_id] * 2);
     }
   }
 }
