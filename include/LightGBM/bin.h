@@ -167,6 +167,7 @@ class BinMapper {
   * \param total_sample_cnt number of total sample count, equal with values.size() + num_zeros
   * \param max_bin The maximal number of bin
   * \param min_data_in_bin min number of data in one bin
+  * \param min_data_in_leaf min number of data in one leaf
   * \param min_split_data
   * \param pre_filter
   * \param bin_type Type of this bin
@@ -174,8 +175,8 @@ class BinMapper {
   * \param zero_as_missing True to use zero as missing value
   * \param forced_upper_bounds Vector of split points that must be used (if this has size less than max_bin, remaining splits are found by the algorithm)
   */
-  void FindBin(double* values, int num_values, size_t total_sample_cnt, int max_bin, int min_data_in_bin, int min_split_data, bool pre_filter, BinType bin_type,
-               bool use_missing, bool zero_as_missing, const std::vector<double>& forced_upper_bounds);
+  void FindBin(double* values, int num_values, size_t total_sample_cnt, int max_bin, int min_data_in_bin, int min_data_in_leaf, int min_split_data, bool pre_filter,
+               BinType bin_type, bool use_missing, bool zero_as_missing, const std::vector<double>& forced_upper_bounds);
 
   /*!
   * \brief Serializing this object to buffer
